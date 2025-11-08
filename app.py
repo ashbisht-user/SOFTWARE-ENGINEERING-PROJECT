@@ -1,6 +1,5 @@
 import streamlit as st
 import json
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
@@ -12,7 +11,23 @@ with open("Untitled (2).json", "r", encoding="utf-8") as f:
     careers = json.load(f)
 
 # Load model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Create TF-IDF model
+vectorizer = TfidfVectorizer()
+
+career_texts = [" ".join(c["required_skills"] + c["interest_tags"]) for c in careers]
+
+# Fit and transform career data
+career_vectors = vectorizer.fit_transform(career_texts)
+
+# User vector
+user_text = " ".join(user_skills + user_interests)
+user_vector = vectorizer.transform([user_text])
+
+similarities = cosine_similarity(user_vector, career_vectors)[0]
+
 
 st.title("🚀 AI Career Roadmap Generator")
 st.markdown("Enter your **skills** and **interests** to discover your ideal career path and personalized roadmap.")
